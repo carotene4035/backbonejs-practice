@@ -1111,10 +1111,18 @@
         if (!_.isFunction(method)) method = this[events[key]];
         if (!method) continue;
 
+        /** イベントと、イベントを付与するクラスを分ける */
         var match = key.match(delegateEventSplitter);
+        /** イベントとクラスを取り出す */
         var eventName = match[1], selector = match[2];
         method = _.bind(method, this);
+
+        /*
+         * 名前空間をもたせることにより、
+         * イベント解除する時にview毎にイベント解除ができるようにする
+         */
         eventName += '.delegateEvents' + this.cid;
+
         if (selector === '') {
           this.$el.on(eventName, method);
         } else {
