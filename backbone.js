@@ -86,17 +86,17 @@
     // コールバック関数と一緒にname=allを渡すと、そのコールバック関数は
     // どんなイベントがtriggerされてたときでも実行される
     on: function(name, callback, context) {
-      console.log(name);
       if (!eventsApi(this, 'on', name, [callback, context]) || !callback) return this;
       this._events || (this._events = {});
       var events = this._events[name] || (this._events[name] = []);
       events.push({callback: callback, context: context, ctx: context || this});
-      console.log(events);
       return this;
     },
 
     // Bind an event to only be triggered a single time. After the first time
     // the callback is invoked, it will be removed.
+
+    /** */
     once: function(name, callback, context) {
       if (!eventsApi(this, 'once', name, [callback, context]) || !callback) return this;
       var self = this;
@@ -104,6 +104,7 @@
         self.off(name, once);
         callback.apply(this, arguments);
       });
+
       once._callback = callback;
       return this.on(name, once, context);
     },
@@ -144,16 +145,23 @@
     // passed the same arguments as `trigger` is, apart from the event name
     // (unless you're listening on `"all"`, which will cause your callback to
     // receive the true name of the event as the first argument).
+
+    /*
+     * Eventオブジェクトが持っている
+     * this.events = {create: {イベントオブジェクト}, destroy: {イベントオブジェクト}, ...}
+     * この配列から該当のイベントオブジェクトを取り出して、実行する
+     */
     trigger: function(name) {
-      console.log(this._events);
+      /** 取り出す */
+      // console.log(this._events);
       if (!this._events) return this;
       var args = slice.call(arguments, 1);
       if (!eventsApi(this, 'trigger', name, args)) return this;
 
-      /** triggerされたイベントを取り出す */
       var events = this._events[name];
       var allEvents = this._events.all;
 
+      /** 取り出したイベントオブジェクトを、実行する */
       if (events) triggerEvents(events, args);
       if (allEvents) triggerEvents(allEvents, arguments);
       return this;
@@ -178,9 +186,6 @@
   };
 
 
-
-
-
   // Regular expression used to split event strings.
   var eventSplitter = /\s+/;
 
@@ -196,7 +201,6 @@
 
     // Handle event maps.
     if (typeof name === 'object') {
-      console.log('aaaa');
       for (var key in name) {
         obj[action].apply(obj, [key, name[key]].concat(rest));
       }
@@ -205,7 +209,6 @@
 
     // Handle space separated event names.
     if (eventSplitter.test(name)) {
-      console.log(eventSplitter.test(name));
 
       var names = name.split(eventSplitter);
       for (var i = 0, l = names.length; i < l; i++) {
@@ -220,6 +223,12 @@
   // A difficult-to-believe, but optimized internal dispatch function for
   // triggering events. Tries to keep the usual cases speedy (most internal
   // Backbone events have 3 arguments).
+
+  // callは引数を指定して実行する.
+  // applyは引数をまとめて扱う.
+  // そして、callよりもapplyのほうが、どうやら実行効率が悪いらしい。
+
+  /** イベントオブジェクトから実行される, triggerEvents関数 */
   var triggerEvents = function(events, args) {
     var ev, i = -1, l = events.length, a1 = args[0], a2 = args[1], a3 = args[2];
     switch (args.length) {
@@ -1018,9 +1027,14 @@
   var View = Backbone.View = function(options) {
     this.cid = _.uniqueId('view');
     options || (options = {});
+
+    /** view opiton配列に入っているオプションだけ抽出する */
     _.extend(this, _.pick(options, viewOptions));
+
     this._ensureElement();
     this.initialize.apply(this, arguments);
+
+    /** viewにイベントの登録 */
     this.delegateEvents();
   };
 
@@ -1089,6 +1103,9 @@
     delegateEvents: function(events) {
       if (!(events || (events = _.result(this, 'events')))) return this;
       this.undelegateEvents();
+
+      /** ここでイベントを登録する */
+      // viewはイベントトリガなどは用意されておらず、jQueryで制御している
       for (var key in events) {
         var method = events[key];
         if (!_.isFunction(method)) method = this[events[key]];
