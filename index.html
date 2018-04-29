@@ -3,11 +3,32 @@
   <head>
     <meta charset="UTF-8">
     <title></title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
+
+    <div class="taskApp">
+      <h1>TODO</h1>
+      <form class="addTask">
+        <input type="text" class="title" placeholder="タスクを入力してください">
+        <span class="error"></span>
+      </form>
+      <ul class="taskList"></ul>
+      <button class="clear">全て削除</button>
+    </div>
+
+    <!-- taskのtemplate -->
+    <script type="text/template" id="temp-taskItem">
+    <input type="checkbox" class="toggle" <%= closed ? 'checked' : '' %> >
+    <span class="title"><%-title%></span>
+    <a class="del" href="#">x</a>
+    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
+    <script src="./backbone.js"></script>
+    <script type='text/javascript' src='http://cdnjs.cloudflare.com/ajax/libs/backbone-localstorage.js/1.1.14/backbone.localStorage-min.js'></script>
+
     <script src="./app.js"></script>
   </body>
 </html>
