@@ -47,6 +47,7 @@ var TaskView = Backbone.View.extend({
     },
     initialize: function(){
         this.model.on('destroy', this.remove, this);
+        // modelに変更があった時に、renderが走る
         this.model.on('change', this.render, this); // (1)
     },
     template: _.template($('#temp-taskItem').html()), // (2)
