@@ -288,10 +288,19 @@
     this.initialize.apply(this, arguments);
   };
 
+  /*
+   * ここにmodelが持つmethodを書き上げる
+   */
   // Attach all inheritable methods to the Model prototype.
   _.extend(Model.prototype, Events, {
 
     // A hash of attributes whose current and previous value differ.
+    // 変わったかどうかだけではなく、どのattributeがどう変わったかをhashとして保持する
+    // {title: "void"} みたいな感じ
+    //
+    // 「どう変わったか」というのは、
+    // 自分自身（model）が知っておくべきこと。他人が知っているべきではない
+    // (この間の設計、間違っていた。。。)
     changed: null,
 
     // The value returned during the last failed validation.
@@ -350,6 +359,7 @@
       options || (options = {});
 
       // Run validation.
+      // 値をsetした時にvalidationを走らせる
       if (!this._validate(attrs, options)) return false;
 
       // Extract attributes and options.
@@ -360,6 +370,7 @@
       this._changing  = true;
 
       if (!changing) {
+        /** 前の状態を保持 */
         this._previousAttributes = _.clone(this.attributes);
         this.changed = {};
       }
@@ -379,11 +390,16 @@
         }
         unset ? delete current[attr] : current[attr] = val;
       }
+      console.log(this.changed);
+
+      /** 変わった要素名 */
+      console.log(changes);
 
       // Trigger all relevant attribute changes.
       if (!silent) {
         if (changes.length) this._pending = options;
         for (var i = 0, l = changes.length; i < l; i++) {
+          /** triggerはeventsオブジェクトが持っている */
           this.trigger('change:' + changes[i], this, current[changes[i]], options);
         }
       }
